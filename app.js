@@ -1,48 +1,50 @@
 const container = document.querySelector(".container");
 
-const links = [
-	"Michael Jordan",
-	"Kobe Bryant",
-	"Stephen Curry",
-	"Shaquille O’ Neal",
-	"Kevin Durant",
-	"Kawhi Leonard",
-	"Dwyane Wade",
-	"Wilt Chamberlain",
-	"Allen Iverson",
-	"Scottie Pippen",
-	"Russell Westbrook",
-	"Dennis Rodman",
-	"Vince Carter",
-];
 let current = 0;
 let target = 0;
 const ease = 0.04;
 
 // function
-const renderElement = function (innerText) {
-	const innerHtml = `<h1 class="menu-title">${innerText}</h1>`;
+const lerp = (current, target) =>
+	(current * (1 - ease) + target * ease).toFixed(2);
+
+const renderImage = function (wrapper, imageSrc) {
+	const wrapperImage = document.createElement("div");
+	wrapperImage.classList.add("wrapper-image");
+
+	const image = document.createElement("img");
+	image.src = imageSrc;
+
+	wrapperImage.appendChild(image);
+	wrapper.appendChild(wrapperImage);
+};
+
+const renderElement = function ({ name, image }, i) {
+	const innerHtml = `
+	<h1 class="menu-title">
+	${name}
+	<span>${i < 9 ? 0 : ""}${i + 1}</span>
+	</h1>
+	`;
 
 	const element = document.createElement("div");
 	element.classList.add("wrapper");
+	element.style.transform = `rotate(${
+		(360 / links.length) * i
+	}deg) translateX(50%)`;
 	element.insertAdjacentHTML("beforeend", innerHtml);
+
+	renderImage(element, image);
 
 	container.insertAdjacentElement("beforeend", element);
 };
-links.forEach(renderElement);
 
-const lerp = (current, target) =>
-	(current * (1 - ease) + target * ease).toFixed(2);
+links.forEach((link, i) => renderElement(link, i));
 
 const animateScroll = function () {
 	target = window.scrollY;
 	current = lerp(current, target);
-
-	const wrappers = [...document.querySelectorAll(".wrapper")];
-	wrappers.forEach((wrapper, i) => {
-		const space = i * 7 - links.length * 1.3;
-		wrapper.style.transform = `rotate(${-current * 0.1 + space}deg)`;
-	});
+	container.style.transform = `rotate(${-current * 0.07}deg)`;
 
 	requestAnimationFrame(animateScroll);
 };
@@ -50,10 +52,22 @@ const animateScroll = function () {
 animateScroll();
 
 // init
-(function () {
-	const linkHeight = document
-		.querySelector(".menu-title")
-		.getBoundingClientRect().height;
+const init = function () {
+	document.body.style.height = `${6150}px`;
+	window.scrollTo(0, 1030);
+};
+window.addEventListener("DOMContentLoaded", init);
+window.addEventListener("resize", init);
 
-	document.body.style.height = `${(linkHeight * links.length) / 2}px`;
-})();
+document.addEventListener("mouseover", function (e) {
+	if (!e.target.matches(".menu-title")) return;
+	const wrapperImage = e.target.nextElementSibling;
+	wrapperImage.classList.add("active");
+	wrapperImage.style.left = `${e.clientX - 80}px`;
+});
+
+document.addEventListener("mouseout", function (e) {
+	if (!e.target.matches(".menu-title")) return;
+	const wrapperImage = e.target.nextElementSibling;
+	wrapperImage.classList.remove("active");
+});
