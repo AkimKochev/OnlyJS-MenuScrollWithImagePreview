@@ -5,8 +5,7 @@ let target = 0;
 const ease = 0.04;
 
 // function
-const lerp = (current, target) =>
-	(current * (1 - ease) + target * ease).toFixed(2);
+const lerp = (current, target) => current * (1 - ease) + target * ease;
 
 const renderImage = function (wrapper, imageSrc) {
 	const wrapperImage = document.createElement("div");
@@ -41,33 +40,55 @@ const renderElement = function ({ name, image }, i) {
 
 links.forEach((link, i) => renderElement(link, i));
 
+const checkScrollPosition = function () {
+	if (window.scrollY + window.innerHeight === 6150) {
+		window.scrollTo(0, 10);
+	}
+
+	if (window.scrollY < 10) {
+		window.scrollTo(0, 5140);
+	}
+};
+
 const animateScroll = function () {
 	target = window.scrollY;
 	current = lerp(current, target);
-	container.style.transform = `rotate(${-current * 0.07}deg)`;
+	container.style.transform = `rotate(-${(current * 0.07).toFixed(2)}deg)`;
 
+	console.log((target - current) * 0.17);
+	const menuTitle = [...document.querySelectorAll(".menu-title")];
+	menuTitle.forEach((title, i) => {
+		let rotateDeg = (target - current) * 0.2;
+		if (rotateDeg > 60 || rotateDeg < -60) rotateDeg = 0;
+
+		title.style.transform = `translate3d(0, -${rotateDeg}px, 0)`;
+	});
+
+	checkScrollPosition();
 	requestAnimationFrame(animateScroll);
 };
-
-animateScroll();
 
 // init
 const init = function () {
 	document.body.style.height = `${6150}px`;
-	window.scrollTo(0, 1030);
+	setTimeout(() => {
+		window.scrollTo(0, 10);
+		animateScroll();
+	}, 1000);
 };
 window.addEventListener("DOMContentLoaded", init);
-window.addEventListener("resize", init);
 
 document.addEventListener("mouseover", function (e) {
 	if (!e.target.matches(".menu-title")) return;
 	const wrapperImage = e.target.nextElementSibling;
-	wrapperImage.classList.add("active");
 	wrapperImage.style.left = `${e.clientX - 80}px`;
+	wrapperImage.classList.add("active");
+	e.target.closest(".wrapper").style.zIndex = 2;
 });
 
 document.addEventListener("mouseout", function (e) {
 	if (!e.target.matches(".menu-title")) return;
 	const wrapperImage = e.target.nextElementSibling;
 	wrapperImage.classList.remove("active");
+	e.target.closest(".wrapper").style.zIndex = 1;
 });
