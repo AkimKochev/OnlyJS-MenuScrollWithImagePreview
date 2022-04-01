@@ -2,9 +2,8 @@ const container = document.querySelector(".container");
 
 let current = 0;
 let target = 0;
-const ease = 0.04;
+const ease = 0.04; // steps of the animation
 
-// function
 const lerp = (current, target) => current * (1 - ease) + target * ease;
 
 const renderImage = function (wrapper, imageSrc) {
@@ -37,18 +36,7 @@ const renderElement = function ({ name, image }, i) {
 
 	container.insertAdjacentElement("beforeend", element);
 };
-
 links.forEach((link, i) => renderElement(link, i));
-
-const checkScrollPosition = function () {
-	if (window.scrollY + window.innerHeight === 6150) {
-		window.scrollTo(0, 10);
-	}
-
-	if (window.scrollY < 10) {
-		window.scrollTo(0, 5140);
-	}
-};
 
 const animateScroll = function () {
 	target = window.scrollY;
@@ -58,31 +46,27 @@ const animateScroll = function () {
 	console.log((target - current) * 0.17);
 	const menuTitle = [...document.querySelectorAll(".menu-title")];
 	menuTitle.forEach((title, i) => {
-		let rotateDeg = (target - current) * 0.2;
-		if (rotateDeg > 60 || rotateDeg < -60) rotateDeg = 0;
-
-		title.style.transform = `translate3d(0, -${rotateDeg}px, 0)`;
+		let rotateDeg = ((target - current) * 0.03).toFixed(2);
+		// prevent some weird animation when reloading the page with the current scroll in the end of the page
+		if (rotateDeg > 30 || rotateDeg < -30) rotateDeg = 0;
+		title.style.transform = `skewY(${rotateDeg}deg)`;
 	});
 
-	checkScrollPosition();
 	requestAnimationFrame(animateScroll);
 };
 
-// init
 const init = function () {
 	document.body.style.height = `${6150}px`;
-	setTimeout(() => {
-		window.scrollTo(0, 10);
-		animateScroll();
-	}, 1000);
+	animateScroll();
 };
 window.addEventListener("DOMContentLoaded", init);
 
 document.addEventListener("mouseover", function (e) {
 	if (!e.target.matches(".menu-title")) return;
 	const wrapperImage = e.target.nextElementSibling;
-	wrapperImage.style.left = `${e.clientX - 80}px`;
+	wrapperImage.style.left = `${e.clientX - 130}px`;
 	wrapperImage.classList.add("active");
+	// we want the element on top of others
 	e.target.closest(".wrapper").style.zIndex = 2;
 });
 
